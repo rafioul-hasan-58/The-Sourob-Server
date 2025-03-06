@@ -34,6 +34,7 @@ async function run() {
   try {
     const portfolioCollection = client.db("Portfolio").collection("projects")
     const blogCollection = client.db("Portfolio").collection("blogs")
+    const messageCollection = client.db("Portfolio").collection("message")
 
 
     // project operation
@@ -156,6 +157,17 @@ async function run() {
       res.status(httpStatus.OK).json({
         success: true,
         message: 'Blog updated successfully',
+        statusCode: 201,
+        data: result
+      })
+    })
+    //connections
+    app.post('/send-message', async (req, res) => {
+      const projectData = req.body;
+      const result = await messageCollection.insertOne(projectData)
+      res.status(httpStatus.OK).json({
+        success: true,
+        message: 'Message sent successfully',
         statusCode: 201,
         data: result
       })
