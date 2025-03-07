@@ -8,6 +8,7 @@ import cors from 'cors'
 import httpStatus from "http-status"
 import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import config from './app/config';
+import authRouter from './app/modules/auth/auth.route';
 
 
 
@@ -16,6 +17,7 @@ const app: Application = express()
 app.use(express.json())
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3000'], credentials: true }))
+app.use("/api/auth", authRouter);
 // routes
 
 
@@ -81,7 +83,7 @@ async function run() {
       })
     })
     app.patch('/update-project/:id', async (req, res) => {
-      console.log(req.body);
+      // console.log(req.body);
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const options = { upsert: true };
@@ -143,7 +145,7 @@ async function run() {
       })
     })
     app.patch('/update-blog/:id', async (req, res) => {
-      console.log(req.body);
+      // console.log(req.body);
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const options = { upsert: true };
