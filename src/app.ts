@@ -16,7 +16,7 @@ const app: Application = express()
 // parser
 app.use(express.json())
 app.use(cookieParser());
-app.use(cors({ origin: ['http://localhost:3000'], credentials: true }))
+app.use(cors({ origin: ['http://localhost:3000','https://my-fifth-assignment-client.vercel.app'], credentials: true }))
 app.use("/api/auth", authRouter);
 // routes
 
@@ -170,6 +170,38 @@ async function run() {
       res.status(httpStatus.OK).json({
         success: true,
         message: 'Message sent successfully',
+        statusCode: 201,
+        data: result
+      })
+    })
+    //get message
+    app.get('/get-all-messages', async (req, res) => {
+      const result = await messageCollection.find().toArray()
+      res.status(httpStatus.OK).json({
+        success: true,
+        message: 'Message retrived successfully',
+        statusCode: 201,
+        data: result
+      })
+    })
+    app.get('/get-single-message/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await messageCollection.findOne(query)
+      res.status(httpStatus.OK).json({
+        success: true,
+        message: 'Message retrived successfully',
+        statusCode: 201,
+        data: result
+      })
+    })
+    app.delete('/delete-message/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await messageCollection.deleteOne(query)
+      res.status(httpStatus.OK).json({
+        success: true,
+        message: 'Message deleted successfully',
         statusCode: 201,
         data: result
       })
