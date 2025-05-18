@@ -9,6 +9,9 @@ import httpStatus from "http-status"
 import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import config from './app/config';
 import authRouter from './app/modules/auth/auth.route';
+import router from './app/routes';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
+import notFound from './app/middlewares/notFoundPage';
 
 
 
@@ -16,8 +19,8 @@ const app: Application = express()
 // parser
 app.use(express.json())
 app.use(cookieParser());
-app.use(cors({ origin: ['https://my-portfolio-orpin-iota-84.vercel.app'], credentials: true }))
-app.use("/api/auth", authRouter);
+app.use(cors({ origin: ['https://my-portfolio-orpin-iota-84.vercel.app', 'http://localhost:3000'], credentials: true }))
+app.use("/api/", router);
 // routes
 
 
@@ -219,7 +222,9 @@ run().catch(console.dir);
 const test = async (req: Request, res: Response) => {
   res.send('Server Running!!!')
 }
-app.get('/', test)
+app.get('/', test);
+app.use(globalErrorHandler);
+app.use('*',notFound)
 
 
 
