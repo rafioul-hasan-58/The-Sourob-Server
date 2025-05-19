@@ -1,62 +1,61 @@
 import { Request, Response } from "express";
-import { User } from "./auth.model";
-import bcrypt from "bcryptjs";
+import catchAsync from "../../utils/catchAsync";
+import status from "http-status";
+import { authServices } from "./auth.services";
+import config from "../../config";
 
-const randomPass = Math.ceil(Math.random() * 1000000);
-
-export const registerUser = async (req: Request, res: Response) => {
-  // console.log(req.body);
-  try {
-    const { name, email, role } = req.body;
-    // console.log(req.body);
-
-    const password = req.body.password || randomPass;
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      res.status(400).json({ message: "User already exists" });
-      return;
+const createAdmin = catchAsync(async (req: Request, res: Response) => {
+  const result = await authServices.createAdmin(req.body);
+  res.status(status.OK).json({
+    success: true,
+    message: 'Admin added successfully',
+    data: result
+  })
+})
+const login = catchAsync(async (req: Request, res: Response) => {
+  const user = await authServices.login(req.body);
+  const { refreshToken, accessToken } = user;
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: true,
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+  });
+  res.status(status.OK).json({
+    success: true,
+    statusCode: 200,
+    message: "Login successful",
+    data: {
+      accessToken
     }
+  })
+})
 
-    // Create new user
-    // const user = new User({
-    //   name,
-    //   email,
-    //   role,
-    //   password,
-    // });
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+  const result = await authServices.refreshToken(refreshToken);
 
-    // Save user to database
-    const result = await User.create({ name, email, role, password })
-    // console.log('result', result);
+  res.status(status.OK).json({
+    success: true,
+    statusCode: 200,
+    message: "Login refresh successful",
+    data: result
+  })
+})
+const changePassword = catchAsync(async (req: Request & { user?: any }, res: Response) => {
 
-    res.status(201).json({ message: "User registered successfully"});
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
+  const result = await authServices.changePassword(req.user, req.body);
+  res.status(status.OK).json({
+    success: true,
+    statusCode: 200,
+    message: "Password changed successfully",
+    data: result
+  })
+})
 
-export const loginUser = async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      res.status(400).json({ message: "Invalid email or password" });
-      return;
-    }
-
-    // Validate password
-    const isMatch = await bcrypt.compare(password, user!.password);
-    if (!isMatch) {
-      res.status(400).json({ message: "Invalid email or password" });
-      return;
-    }
-
-    res.status(200).json({ message: "Login successful", user });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
+export const authController = {
+  createAdmin,
+  login,
+  refreshToken,
+  changePassword
+}

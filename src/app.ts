@@ -8,7 +8,7 @@ import cors from 'cors'
 import httpStatus from "http-status"
 import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import config from './app/config';
-import authRouter from './app/modules/auth/auth.route';
+import authRouter from './app/modules/auth/auth.routes';
 import router from './app/routes';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFoundPage';
